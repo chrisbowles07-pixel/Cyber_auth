@@ -1,55 +1,46 @@
 #!/bin/bash
-echo "TEST BEGINING STAND BY"
+set -euo pipefail
+IFS=$'\n'
 
-# Extract usernames from /etc/passwd and save to a file
+echo "TEST BEGINNING, STAND BY"
+
+# Extract usernames with UID > 1000 and save to a file
 awk -F: '$3 > 1000 {print $1}' /etc/passwd > current_users.txt
-
-
 echo "Current usernames saved to current_users.txt"
 
-# Define the two files to compare
-touch "authd_adm.txt"
-chmod 777 "authd_adm.txt"
+# Define the two files to compare (create if missing)
 file1="authd_adm.txt"
-touch "authd_usr.txt"
-chmod 777 "authd_usr.txt"
 file2="authd_usr.txt"
 file3="current_users.txt"
 
+: > "$file1"
+chmod 664 "$file1"
+: > "$file2"
+chmod 664 "$file2"
 
-echo "Please input the authorised users into authd_usr.txt. And authd_adm.txt"
-
-# Prompt the user to press Enter
+echo "Please input the authorised users into $file1 (admins) and $file2 (users)."
 read -p "Press Enter when done..."
 
 echo "Confirmation received. Continuing with the script"
 
-
-# Read the file content into an array named 'usernames'
+# Read the admin list into an array (example)
 mapfile -t usernames < "$file1"
+echo "The first user is: ${usernames[0]:-<none>}"
+echo "All users are: ${usernames[*]:-<none>}"
 
-# Now you can access the usernames
-echo "The first user is: ${usernames[0]}"
-echo "The second user is: ${usernames[1]}"
-echo "All users are: ${usernames[@]}"
-
-# You can also loop through the array to process each username
 for user in "${usernames[@]}"; do
     echo "Processing user: $user"
 done
 
+# Combine the two authorised files
+combined="combined.txt"
+cat "$file1" "$file2" > "$combined"
+chmod 664 "$combined"
+echo "Combined authorised lists into $combined"
 
-# combined 1 and 2   
-touch "combined.txt"
-chmod 777 "combined.txt"
-cat file1.txt file2.txt > combined.txt
+# Compare the combined list with actual users
+diff "$combined" "$file3" > diff.txt || true
+echo "Differences (if any) written to diff.txt"
 
-
-
-# You can add more commands here that execute after confirmation
-# Compare the two files and display differences
-echo "Comparing authd and actual:"
-diff combined.txt file3 > diff.txt
-
-echo "TEST OVER BEGINING REGULARLY SCHEDUALD PROGRAMING"
+echo "TEST OVER — BEGINNING REGULARLY SCHEDULED PROGRAMMING"
 echo "test complete"
