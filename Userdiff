@@ -1,0 +1,55 @@
+#!/bin/bash
+echo "TEST BEGINING STAND BY"
+
+# Extract usernames from /etc/passwd and save to a file
+awk -F: '$3 > 1000 {print $1}' /etc/passwd > current_users.txt
+
+
+echo "Current usernames saved to current_users.txt"
+
+# Define the two files to compare
+touch "authd_adm.txt"
+chmod 777 "authd_adm.txt"
+file1="authd_adm.txt"
+touch "authd_usr.txt"
+chmod 777 "authd_usr.txt"
+file2="authd_usr.txt"
+file3="current_users.txt"
+
+
+echo "Please input the authorised users into authd_usr.txt. And authd_adm.txt"
+
+# Prompt the user to press Enter
+read -p "Press Enter when done..."
+
+echo "Confirmation received. Continuing with the script"
+
+
+# Read the file content into an array named 'usernames'
+mapfile -t usernames < "$file1"
+
+# Now you can access the usernames
+echo "The first user is: ${usernames[0]}"
+echo "The second user is: ${usernames[1]}"
+echo "All users are: ${usernames[@]}"
+
+# You can also loop through the array to process each username
+for user in "${usernames[@]}"; do
+    echo "Processing user: $user"
+done
+
+
+# combined 1 and 2   
+touch "combined.txt"
+chmod 777 "combined.txt"
+cat file1.txt file2.txt > combined.txt
+
+
+
+# You can add more commands here that execute after confirmation
+# Compare the two files and display differences
+echo "Comparing authd and actual:"
+diff combined.txt file3 > diff.txt
+
+echo "TEST OVER BEGINING REGULARLY SCHEDUALD PROGRAMING"
+echo "test complete"
