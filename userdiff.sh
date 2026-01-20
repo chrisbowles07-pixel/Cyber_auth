@@ -10,8 +10,8 @@ echo "TEST BEGINNING, STAND BY"
 
 # Extract usernames with UID >= 1000 and save to a file
 # (Change >= to > if you prefer to exclude UID 1000)
-awk -F: '$3 >= 1000 {print $1}' /etc/passwd | sort -u > "$tmpdir/current_users_raw.txt"
-echo "Current usernames saved to $tmpdir/current_users_raw.txt"
+awk -F: '$3 >= 1000 {print $1}' /etc/passwd | sort -u > "$tmpdir/current_users.txt"
+echo "Current usernames saved to $tmpdir/current_users.txt"
 
 # Define the two files to compare (create if missing)
 file1="authd_adm.txt"
@@ -58,7 +58,7 @@ chmod 777 "$combined"
 echo "Combined authorised lists into $combined"
 
 # Prepare current users file (sorted, unique) and also save a copy to file3
-sort -u "$tmpdir/current_users_raw.txt" > "$tmpdir/current_sorted.txt"
+sort -u "$tmpdir/current_users.txt" > "$tmpdir/current_sorted.txt"
 cp "$tmpdir/current_sorted.txt" "$file3"
 chmod 777 "$file3"
 
