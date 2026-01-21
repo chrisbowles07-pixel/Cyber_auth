@@ -10,8 +10,8 @@ echo "TEST BEGINNING, STAND BY"
 
 # Extract usernames with UID >= 1000 and save to a file
 # (Change >= to > if you prefer to exclude UID 1000)
-awk -F: '$3 >= 1000 {print $1}' /etc/passwd | sort -u > "$tmpdir/current_users.txt"
-echo "Current usernames saved to $tmpdir/current_users.txt"
+awk -F: '$3 >= 1000 {print $1}' /etc/passwd | sort -u > "current_users.txt"
+echo "Current usernames saved to current_users.txt"
 
 # Define the two files to compare (create if missing)
 file1="authd_adm.txt"
@@ -44,36 +44,36 @@ clean_file() {
   sed -E 's/^[[:space:]]*#.*$//; s/[[:space:]]+$//; s/^[[:space:]]+//; /^$/d' "$src" | sort -u > "$dst"
 }
 
-clean_file "$file1" "$tmpdir/authd_adm.clean"
-clean_file "$file2" "$tmpdir/authd_usr.clean"
+clean_file "$file1" "authd_adm.clean"
+clean_file "$file2" "authd_usr.clean"
 
-echo "The first user in $file1 (if any): $(head -n1 "$tmpdir/authd_adm.clean" || echo '<none>')"
-echo "All admins: $(paste -sd', ' "$tmpdir/authd_adm.clean" || echo '<none>')"
-echo "All users: $(paste -sd', ' "$tmpdir/authd_usr.clean" || echo '<none>')"
+echo "The first user in $file1 (if any): $(head -n1 "authd_adm.clean" || echo '<none>')"
+echo "All admins: $(paste -sd', ' "authd_adm.clean" || echo '<none>')"
+echo "All users: $(paste -sd', ' "authd_usr.clean" || echo '<none>')"
 
 # Combine the two authorised files (sorted, unique)
-combined="$tmpdir/combined.clean"
-cat "$tmpdir/authd_adm.clean" "$tmpdir/authd_usr.clean" | sort -u > "$combined"
+combined="combined.clean"
+cat "authd_adm.clean" "authd_usr.clean" | sort -u > "$combined"
 chmod 777 "$combined"
 echo "Combined authorised lists into $combined"
 
 # Prepare current users file (sorted, unique) and also save a copy to file3
-sort -u "$tmpdir/current_users.txt" > "$tmpdir/current_sorted.txt"
-cp "$tmpdir/current_sorted.txt" "$file3"
+sort -u "current_users.txt" > "current_sorted.txt"
+cp "current_sorted.txt" "$file3"
 chmod 777 "$file3"
 
 # Compare the combined list with actual users using comm (works on sorted files)
 # Lines only in current_sorted (present on system but NOT authorised) => unauthorized
 # Lines only in combined (authorised but NOT present) => missing_authorized
-unauthorized="$tmpdir/unauthorized.txt"
-missing_authorized="$tmpdir/missing_authorized.txt"
+unauthorized="unauthorized.txt"
+missing_authorized="missing_authorized.txt"
 
-comm -23 "$tmpdir/current_sorted.txt" "$combined" > "$unauthorized" || true
-comm -13 "$tmpdir/current_sorted.txt" "$combined" > "$missing_authorized" || true
+comm -23 "current_sorted.txt" "$combined" > "$unauthorized" || true
+comm -13 "current_sorted.txt" "$combined" > "$missing_authorized" || true
 
 # Produce a unified diff of the sorted lists for record
 diff_out="diff.txt"
-diff -u "$combined" "$tmpdir/current_sorted.txt" > "$diff_out" || true
+diff -u "$combined" "current_sorted.txt" > "$diff_out" || true
 
 echo "Differences written to $diff_out"
 echo "Unauthorized users (present on system but not authorised):"
